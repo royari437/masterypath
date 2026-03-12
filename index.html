@@ -3,112 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MasteryPath v7.1 - Fixed</title>
+    <title>MasteryPath v8.0 - Streak Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d1117; --surface: #161b22; --primary: #58a6ff;
-            --accent: #238636; --text: #c9d1d9; --text-dim: #8b949e; --gold: #f1e05a; --heart: #f85149;
+            --accent: #238636; --text: #c9d1d9; --text-dim: #8b949e; 
+            --gold: #f1e05a; --heart: #f85149; --streak: #ff7b72;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; overflow-x: hidden; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #30363d; z-index: 1000; }
-        .nav-item { color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; flex: 1; transition: 0.2s; }
-        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #30363d; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        .nav-item { color: var(--text-dim); font-size: 10px; font-weight: 800; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
 
-        .container { max-width: 600px; margin: auto; padding: 20px; }
-        .tab-content { display: none; animation: slideUp 0.3s ease-out; }
+        /* Container & Animation */
+        .container { max-width: 500px; margin: auto; padding: 20px; }
+        .tab-content { display: none; animation: slideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        .card { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid #30363d; margin-bottom: 20px; }
+        /* Cards & UI Elements */
+        .card { background: var(--surface); padding: 20px; border-radius: 20px; border: 1px solid #30363d; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .streak-tag { position: absolute; top: 0; right: 0; background: var(--streak); color: white; padding: 5px 15px; font-size: 10px; font-weight: 800; border-bottom-left-radius: 15px; display: flex; align-items: center; gap: 5px; }
         
-        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .badge-item { background: #0d1117; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #30363d; opacity: 0.3; transition: 0.3s; filter: grayscale(1); }
-        .badge-item.unlocked { opacity: 1; filter: grayscale(0); border-color: var(--gold); background: rgba(241, 224, 90, 0.05); }
-        .badge-icon { font-size: 24px; display: block; margin-bottom: 5px; }
-        .badge-name { font-size: 9px; font-weight: 800; color: var(--text); display: block; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-box { background: #0d1117; padding: 15px; border-radius: 15px; border: 1px solid #30363d; text-align: center; transition: 0.3s; }
+        .stat-box:active { transform: scale(0.95); border-color: var(--primary); }
+        .stat-val { font-size: 22px; font-weight: 800; color: var(--primary); display: block; }
 
-        .feed-item { background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 12px; border: 1px solid #30363d; }
-        .feed-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .respect-btn { background: #0d1117; border: 1px solid #30363d; color: var(--text); padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        /* Badges */
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .badge-item { background: var(--surface); padding: 15px 10px; border-radius: 18px; text-align: center; border: 1px solid #30363d; filter: grayscale(1); opacity: 0.2; transition: 0.5s; }
+        .badge-item.unlocked { filter: grayscale(0); opacity: 1; border-color: var(--gold); background: linear-gradient(145deg, #1c2128, #161b22); box-shadow: 0 5px 15px rgba(241, 224, 90, 0.1); }
+        .badge-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+        .badge-name { font-size: 10px; font-weight: 800; color: var(--text); }
+
+        /* Inputs & Buttons */
+        label { display: block; font-size: 10px; color: var(--text-dim); margin-bottom: 6px; font-weight: 800; margin-left: 5px; }
+        input, select { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; font-family: inherit; font-size: 14px; }
+        input:focus { border-color: var(--primary); }
+        
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-add { background: var(--accent); color: white; box-shadow: 0 5px 15px rgba(35, 134, 54, 0.3); }
+        .btn-add:active { transform: scale(0.97); }
+        .btn-primary { background: var(--primary); color: #000; }
+
+        /* Feed & Items */
+        .feed-item { background: var(--surface); padding: 18px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #30363d; border-left: 5px solid var(--primary); }
+        .respect-btn { background: #0d1117; border: 1px solid #30363d; color: var(--text); padding: 8px 16px; border-radius: 25px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .respect-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(88, 166, 255, 0.1); }
 
-        .quest-card { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
-        .stat-val { font-size: 20px; font-weight: 800; color: var(--primary); }
+        .quest-card { background: #0d1117; padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
         
-        input, select { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; font-size: 14px; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; }
-        .btn-add { background: var(--accent); color: white; }
-        .btn-primary { background: var(--primary); color: #000; }
-        
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; padding: 40px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen" class="login-overlay" style="display: none;">
-    <h1 style="color: var(--primary); font-size: 36px; font-weight: 800; margin-bottom: 20px;">MasteryPath</h1>
-    <button class="btn btn-primary" onclick="handleAuth()" style="width: 80%;">LOG IN / REGISTER</button>
+    <h1 style="color: var(--primary); font-size: 42px; font-weight: 800; margin-bottom: 10px;">MasteryPath</h1>
+    <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 40px;">Ubah hidupmu menjadi video game nyata.</p>
+    <button class="btn btn-primary" onclick="handleAuth()">MULAI PETUALANGAN</button>
 </div>
 
 <nav class="bottom-nav" id="navbar" style="display: none;">
-    <div class="nav-item active" onclick="showTab('home', this)">🏠<br>Feed</div>
-    <div class="nav-item" onclick="showTab('quests', this)">⚔️<br>Quests</div>
-    <div class="nav-item" onclick="showTab('achievements', this)">🏆<br>Badges</div>
-    <div class="nav-item" onclick="showTab('profile', this)">👤<br>Profile</div>
+    <div class="nav-item active" onclick="showTab('home', this)">🌍<br>Feed</div>
+    <div class="nav-item" onclick="showTab('quests', this)">⚔️<br>Misi</div>
+    <div class="nav-item" onclick="showTab('achievements', this)">🏆<br>Badge</div>
+    <div class="nav-item" onclick="showTab('profile', this)">👤<br>Profil</div>
 </nav>
 
 <div class="container" id="main-content" style="opacity: 0;">
-    
-    <div id="home" class="tab-content active">
-        <h2 style="margin-bottom: 20px; font-weight: 800;">Warga Activity</h2>
+    ```
+
+---
+
+**Apakah kamu mau saya berikan "Setengah Bagian Bawah" kode (Logika JavaScript & Tab Content)?** Bagian bawah ini sangat penting karena berisi fitur **Daily Streak** dan sistem **Ranking** yang sudah diperbaiki!
+<div id="home" class="tab-content active">
+        <h2 style="margin-bottom: 20px; font-weight: 800;">Global Activity</h2>
         <div id="global-feed"></div>
     </div>
 
     <div id="quests" class="tab-content">
         <div class="card">
             <h3 style="margin-bottom: 15px;">New Mission</h3>
-            <input type="text" id="q-title" placeholder="Nama Misi...">
-            <input type="text" id="q-note" placeholder="Bukti / Catatan...">
+            <label>Judul Misi</label>
+            <input type="text" id="q-title" placeholder="Contoh: Belajar JavaScript">
+            <label>Bukti / Link Kerja</label>
+            <input type="text" id="q-note" placeholder="Link github atau catatan singkat">
+            <label>Bidang Keahlian</label>
             <select id="q-type">
                 <option value="logic">Logic (IT/Math)</option>
                 <option value="discipline">Discipline (Habit)</option>
                 <option value="lead">Leadership (Social)</option>
                 <option value="creat">Creativity (Art)</option>
             </select>
-            <button class="btn btn-add" onclick="addNewQuest()">START MISSION</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><label>Durasi</label><select id="q-time"><option value="1">30 Mnt</option><option value="2">2 Jam</option><option value="3">3 Jam+</option></select></div>
+                <div><label>Kesulitan</label><select id="q-diff"><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div>
+            </div>
+            <button class="btn btn-add" onclick="addNewQuest()">MULAI MISI</button>
         </div>
-        <h3 style="margin-bottom: 15px;">Active Misi</h3>
+        <h3 style="margin-bottom: 15px;">Misi Aktif</h3>
         <div id="quest-list"></div>
     </div>
 
     <div id="achievements" class="tab-content">
-        <h2 style="margin-bottom: 20px;">Hall of Fame</h2>
+        <h2 style="margin-bottom: 20px;">Gallery Badge</h2>
         <div class="badge-grid" id="badge-container"></div>
     </div>
 
     <div id="profile" class="tab-content">
         <div class="card" style="text-align: center;">
-            <h2 id="user-display">User</h2>
-            <div style="font-size: 48px; font-weight: 800; color: var(--primary); margin: 10px 0;" id="lvl-display">LVL 1</div>
-            <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 20px;">Daily: <span id="daily-exp">0</span>/200 XP</div>
+            <div class="streak-tag" id="streak-display">🔥 0 Days</div>
+            <h2 id="user-display" style="font-size: 24px;">User</h2>
+            <div style="font-size: 48px; font-weight: 800; color: var(--primary); margin: 15px 0;" id="lvl-display">LVL 1</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 20px;">Daily Progress: <span id="daily-exp">0</span>/200 XP</div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid #30363d;">
-                    <small style="color:var(--text-dim)">Logic</small><br><span class="stat-val" id="st-logic">0</span>
-                </div>
-                <div style="background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid #30363d;">
-                    <small style="color:var(--text-dim)">Disc</small><br><span class="stat-val" id="st-disc">0</span>
-                </div>
+            <div class="stat-grid">
+                <div class="stat-box"><small style="color:var(--text-dim)">Logic</small><span class="stat-val" id="st-logic">0</span></div>
+                <div class="stat-box"><small style="color:var(--text-dim)">Disc</small><span class="stat-val" id="st-disc">0</span></div>
+                <div class="stat-box"><small style="color:var(--text-dim)">Lead</small><span class="stat-val" id="st-lead">0</span></div>
+                <div class="stat-box"><small style="color:var(--text-dim)">Creat</small><span class="stat-val" id="st-creat">0</span></div>
             </div>
-            <button onclick="logout()" style="margin-top: 20px; background: none; border: none; color: var(--heart); font-size: 12px; cursor: pointer; font-weight: bold;">SIGN OUT</button>
+            <button onclick="logout()" style="margin-top: 25px; background: none; border: none; color: var(--heart); font-size: 11px; font-weight: 800; letter-spacing: 1px; cursor: pointer;">SIGN OUT</button>
         </div>
-        <h3>Leaderboard</h3><br>
+
+        <h3 style="margin-bottom: 15px;">Global Leaderboard</h3>
         <div id="leaderboard-list"></div>
     </div>
-
 </div>
 
 <script type="module">
@@ -132,13 +158,12 @@
     let userData = {};
     let currentUser = null;
 
-    const ALL_BADGES = [
-        { id: 'first_step', icon: '🐣', name: 'First Step', goal: 1 },
-        { id: 'hard_worker', icon: '⚒️', name: 'Hard Worker', goal: 10 },
-        { id: 'logic_expert', icon: '🧠', name: 'Logic Expert', stat: 'logic', goal: 10 },
-        { id: 'iron_will', icon: '🛡️', name: 'Iron Will', stat: 'discipline', goal: 10 },
-        { id: 'level_5', icon: '⭐', name: 'Elite User', stat: 'level', goal: 5 },
-        { id: 'legend', icon: '👑', name: 'Master Legend', stat: 'level', goal: 10 }
+    const BADGES = [
+        {id:'b1', icon:'🐣', name:'First Step', goal: 1},
+        {id:'b2', icon:'🔥', name:'3 Day Streak', stat:'streak', goal: 3},
+        {id:'b3', icon:'🧠', name:'Logic Expert', stat:'logic', goal: 10},
+        {id:'b4', icon:'🛡️', name:'Iron Will', stat:'discipline', goal: 10},
+        {id:'b5', icon:'👑', name:'Level 10', stat:'level', goal: 10}
     ];
 
     window.showTab = (tabId, el) => {
@@ -146,18 +171,23 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         el.classList.add('active');
+        window.scrollTo(0,0);
     };
 
     window.handleAuth = async () => {
         const email = prompt("Email:");
-        const pass = prompt("Password:");
+        const pass = prompt("Password (min 6 char):");
         if(!email || !pass) return;
         try {
             await signInWithEmailAndPassword(auth, email, pass);
         } catch (e) {
-            if(confirm("Daftar baru?")) {
+            if(confirm("Daftar akun baru?")) {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                userData = { username: email.split('@')[0], level: 1, exp: 0, dailyExp: 0, weeklyExp: 0, logic: 0, discipline: 0, lead: 0, creat: 0, totalQuests: 0, myQuests: [], lastDailyReset: new Date().toDateString() };
+                userData = { 
+                    username: email.split('@')[0], level: 1, exp: 0, dailyExp: 0, weeklyExp: 0, 
+                    logic: 0, discipline: 0, lead: 0, creat: 0, totalQuests: 0, streak: 0,
+                    myQuests: [], lastDailyReset: new Date().toDateString(), lastLogin: new Date().toDateString()
+                };
                 await setDoc(doc(db, "users", res.user.uid), userData);
             }
         }
@@ -166,11 +196,15 @@
     window.logout = () => signOut(auth).then(() => location.reload());
 
     window.addNewQuest = async () => {
-        const title = document.getElementById('q-title').value;
-        const note = document.getElementById('q-note').value;
+        const t = document.getElementById('q-title').value;
+        const n = document.getElementById('q-note').value;
         const type = document.getElementById('q-type').value;
-        if(!title) return;
-        userData.myQuests.push({ id: Date.now(), title, note, type, exp: 25, unlockAt: Date.now() + 60000 });
+        const time = parseInt(document.getElementById('q-time').value);
+        const diff = parseInt(document.getElementById('q-diff').value);
+        if(!t) return alert("Isi judul misi!");
+
+        const xp = (time * 15) + (diff * 10);
+        userData.myQuests.push({ id: Date.now(), title: t, note: n, type, exp: xp, unlockAt: Date.now() + (time * 60000) });
         await updateDoc(doc(db, "users", currentUser.uid), { myQuests: userData.myQuests });
         document.getElementById('q-title').value = ""; document.getElementById('q-note').value = "";
     };
@@ -178,21 +212,17 @@
     window.completeQuest = async (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
         const q = userData.myQuests[idx];
-        if (Date.now() < q.unlockAt) return alert("Sabar!");
+        if (Date.now() < q.unlockAt) return alert("Misi masih dalam proses!");
 
         userData.exp += q.exp;
         userData.dailyExp += q.exp;
         userData.weeklyExp += q.exp;
         userData[q.type]++;
-        userData.totalQuests = (userData.totalQuests || 0) + 1;
+        userData.totalQuests++;
 
         await addDoc(collection(db, "feed"), { 
-            userId: currentUser.uid, 
-            username: userData.username, 
-            title: q.title, 
-            note: q.note || "Tanpa bukti", 
-            respects: [] , 
-            timestamp: serverTimestamp() 
+            userId: currentUser.uid, username: userData.username, 
+            title: q.title, note: q.note || "Selesai!", respects: [], timestamp: serverTimestamp() 
         });
 
         if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
@@ -200,66 +230,79 @@
         await updateDoc(doc(db, "users", currentUser.uid), userData);
     };
 
-    window.giveRespect = async (feedId, respectArray) => {
-        if (respectArray.includes(currentUser.uid)) return alert("Kamu sudah memberi Respect!");
-        const feedRef = doc(db, "feed", feedId);
-        await updateDoc(feedRef, { respects: arrayUnion(currentUser.uid) });
+    window.giveRespect = async (feedId, respecters) => {
+        if (respecters.includes(currentUser.uid)) return alert("Sudah memberi respect!");
+        await updateDoc(doc(db, "feed", feedId), { respects: arrayUnion(currentUser.uid) });
     };
 
+    function checkStreak() {
+        const today = new Date().toDateString();
+        const last = userData.lastLogin;
+        if (last === today) return;
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (last === yesterday.toDateString()) {
+            userData.streak++;
+        } else {
+            userData.streak = 1;
+        }
+        userData.lastLogin = today;
+    }
+
     function updateUI() {
+        checkStreak();
         document.getElementById('main-content').style.opacity = "1";
         document.getElementById('auth-screen').style.display = "none";
         document.getElementById('navbar').style.display = "flex";
+        
         document.getElementById('user-display').innerText = userData.username;
         document.getElementById('lvl-display').innerText = `LVL ${userData.level}`;
+        document.getElementById('streak-display').innerText = `🔥 ${userData.streak || 1} Days`;
         document.getElementById('daily-exp').innerText = userData.dailyExp;
         document.getElementById('st-logic').innerText = userData.logic;
         document.getElementById('st-disc').innerText = userData.discipline;
+        document.getElementById('st-lead').innerText = userData.lead;
+        document.getElementById('st-creat').innerText = userData.creat;
 
         document.getElementById('quest-list').innerHTML = userData.myQuests.map(q => `
             <div class="quest-card">
-                <div><strong>${q.title}</strong><br><small style="color:var(--text-dim)">${q.type.toUpperCase()}</small></div>
+                <div><strong>${q.title}</strong><br><small style="color:var(--text-dim)">${q.type.toUpperCase()} • +${q.exp}XP</small></div>
                 <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="completeQuest(${q.id})">DONE</button>
             </div>
-        `).join('') || '<p style="color:var(--text-dim); text-align:center;">Kosong.</p>';
+        `).join('') || '<p align="center" style="font-size:12px; color:var(--text-dim);">Belum ada misi aktif.</p>';
 
-        document.getElementById('badge-container').innerHTML = ALL_BADGES.map(b => {
-            const unlocked = b.stat ? userData[b.stat] >= b.goal : (userData.totalQuests || 0) >= b.goal;
-            return `<div class="badge-item ${unlocked ? 'unlocked' : ''}"><span class="badge-icon">${b.icon}</span><span class="badge-name">${b.name}</span></div>`;
+        document.getElementById('badge-container').innerHTML = BADGES.map(b => {
+            const unlocked = b.stat ? userData[b.stat] >= b.goal : userData.totalQuests >= b.goal;
+            return `<div class="badge-item ${unlocked?'unlocked':''}"><span class="badge-icon">${b.icon}</span><span class="badge-name">${b.name}</span></div>`;
         }).join('');
     }
 
     onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
         document.getElementById('global-feed').innerHTML = snap.docs.map(doc => {
             const d = doc.data();
-            const hasLiked = d.respects.includes(currentUser?.uid);
+            const liked = d.respects.includes(currentUser?.uid);
             return `
                 <div class="feed-item">
-                    <div class="feed-header">
-                        <strong>@${d.username}</strong>
-                        <button class="respect-btn ${hasLiked ? 'active' : ''}" onclick="giveRespect('${doc.id}', ${JSON.stringify(d.respects)})">
-                            🤝 ${d.respects.length}
-                        </button>
-                    </div>
+                    <div class="feed-header"><strong>@${d.username}</strong><button class="respect-btn ${liked?'active':''}" onclick="giveRespect('${doc.id}', ${JSON.stringify(d.respects)})">🤝 ${d.respects.length}</button></div>
                     <div style="font-weight:800; color:var(--primary);">${d.title}</div>
                     <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">"${d.note}"</div>
-                </div>
-            `;
+                </div>`;
         }).join('');
     });
 
     onSnapshot(query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10)), (snap) => {
-        document.getElementById('leaderboard-list').innerHTML = snap.docs.map((doc, i) => `
-            <div class="quest-card" style="margin-bottom:8px; border-left: ${currentUser && doc.id === currentUser.uid ? '4px solid var(--primary)' : 'none'}">
-                <span>#${i+1} ${doc.data().username}</span><span style="color:var(--gold); font-weight:800;">${doc.data().weeklyExp} XP</span>
-            </div>
-        `).join('');
+        document.getElementById('leaderboard-list').innerHTML = snap.docs.map((d, i) => `
+            <div class="quest-card" style="margin-bottom:8px; border-left:${currentUser&&d.id===currentUser.uid?'4px solid var(--primary)':'1px solid #30363d'}">
+                <span>#${i+1} ${d.data().username}</span><span style="color:var(--gold); font-weight:800;">${d.data().weeklyExp} XP</span>
+            </div>`).join('');
     });
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            onSnapshot(doc(db, "users", user.uid), (d) => { if (d.exists()) { userData = d.data(); updateUI(); } });
+    onAuthStateChanged(auth, u => {
+        if (u) {
+            currentUser = u;
+            onSnapshot(doc(db, "users", u.uid), d => { if(d.exists()){ userData = d.data(); updateUI(); } });
         } else {
             document.getElementById('auth-screen').style.display = "flex";
             document.getElementById('navbar').style.display = "none";
