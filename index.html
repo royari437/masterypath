@@ -3,101 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MasteryPath v6.0</title>
+    <title>MasteryPath v7.0 - Achievement Update</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d1117; --surface: #161b22; --primary: #58a6ff;
-            --accent: #238636; --text: #c9d1d9; --text-dim: #8b949e; --gold: #f1e05a;
+            --accent: #238636; --text: #c9d1d9; --text-dim: #8b949e; --gold: #f1e05a; --heart: #f85149;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
         
-        /* Navigation */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #30363d; z-index: 1000; }
-        .nav-item { color: var(--text-dim); text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; flex: 1; }
-        .nav-item.active { color: var(--primary); }
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #30363d; z-index: 1000; }
+        .nav-item { color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; flex: 1; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
 
-        /* Container & Tabs */
+        /* Layout & Tabs */
         .container { max-width: 600px; margin: auto; padding: 20px; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; animation: slideUp 0.3s ease-out; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: var(--surface); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; }
+        .card { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid #30363d; margin-bottom: 20px; }
         
-        /* Custom UI */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #21262d; text-align: center; }
-        .stat-val { font-size: 20px; font-weight: 800; color: var(--primary); }
+        /* Achievement Badges */
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .badge-item { background: #0d1117; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #30363d; opacity: 0.3; transition: 0.3s; filter: grayscale(1); }
+        .badge-item.unlocked { opacity: 1; filter: grayscale(0); border-color: var(--gold); background: rgba(241, 224, 90, 0.05); }
+        .badge-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+        .badge-name { font-size: 9px; font-weight: 800; color: var(--text); display: block; }
 
-        label { display: block; font-size: 10px; margin-bottom: 5px; color: var(--text-dim); text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-add { background: var(--accent); color: white; }
-        .btn-primary { background: var(--primary); color: #000; }
+        /* Feed & UI */
+        .feed-item { background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 12px; border: 1px solid #30363d; }
+        .feed-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .respect-btn { background: #0d1117; border: 1px solid #30363d; color: var(--text); padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .respect-btn:active { transform: scale(0.9); }
+        .respect-btn.liked { border-color: var(--heart); color: var(--heart); }
 
-        .feed-item { background: var(--surface); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #30363d; border-left: 4px solid var(--gold); }
         .quest-card { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
-
+        .stat-val { font-size: 20px; font-weight: 800; color: var(--primary); }
+        
+        input, select { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; font-size: 14px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; }
+        .btn-add { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(35, 134, 54, 0.3); }
+        .btn-primary { background: var(--primary); color: #000; }
+        
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen" class="login-overlay" style="display: none;">
-    <h1 style="color: var(--primary); font-size: 32px; margin-bottom: 20px;">MasteryPath</h1>
+    <h1 style="color: var(--primary); font-size: 36px; font-weight: 800; margin-bottom: 10px;">MasteryPath</h1>
+    <p style="color: var(--text-dim); margin-bottom: 30px;">Become the best version of yourself.</p>
     <button class="btn btn-primary" onclick="handleAuth()" style="width: 80%;">LOG IN / REGISTER</button>
 </div>
 
 <nav class="bottom-nav" id="navbar" style="display: none;">
-    <div class="nav-item active" onclick="showTab('home', this)">🏠<br>Home</div>
+    <div class="nav-item active" onclick="showTab('home', this)">🏠<br>Feed</div>
     <div class="nav-item" onclick="showTab('quests', this)">⚔️<br>Quests</div>
+    <div class="nav-item" onclick="showTab('achievements', this)">🏆<br>Badges</div>
     <div class="nav-item" onclick="showTab('profile', this)">👤<br>Profile</div>
 </nav>
 
 <div class="container" id="main-content" style="opacity: 0;">
     
     <div id="home" class="tab-content active">
-        <h2 style="margin-bottom: 20px;">Global Feed</h2>
+        <h2 style="margin-bottom: 20px; font-weight: 800;">Warga Activity</h2>
         <div id="global-feed"></div>
     </div>
 
     <div id="quests" class="tab-content">
         <div class="card">
-            <h3>Add New Quest</h3><br>
+            <h3 style="margin-bottom: 15px;">New Mission</h3>
             <input type="text" id="q-title" placeholder="Nama Misi...">
-            <input type="text" id="q-note" placeholder="Bukti / Link...">
-            <label>Skill</label>
+            <input type="text" id="q-note" placeholder="Bukti / Catatan...">
             <select id="q-type">
-                <option value="logic">Logic</option>
-                <option value="discipline">Discipline</option>
-                <option value="lead">Leadership</option>
-                <option value="creat">Creativity</option>
+                <option value="logic">Logic (IT/Math)</option>
+                <option value="discipline">Discipline (Habit)</option>
+                <option value="lead">Leadership (Social)</option>
+                <option value="creat">Creativity (Art)</option>
             </select>
-            <button class="btn btn-add" onclick="addNewQuest()">Mulai Misi Sekarang</button>
+            <button class="btn btn-add" onclick="addNewQuest()">START MISSION</button>
         </div>
-        <h3>Active Quests</h3><br>
+        <h3 style="margin-bottom: 15px;">Active Misi</h3>
         <div id="quest-list"></div>
     </div>
 
-    <div id="profile" class="tab-content">
-        <div class="card" style="text-align: center;">
-            <h2 id="user-display">User</h2>
-            <p id="rank-display" style="color: var(--gold); margin: 10px 0; font-weight: bold;"></p>
-            <div style="font-size: 40px; font-weight: 800; color: var(--primary);" id="lvl-display">LVL 1</div>
-            <div style="font-size: 12px; color: var(--text-dim);">Daily: <span id="daily-exp">0</span>/200 XP</div>
-            
-            <div class="stat-grid">
-                <div class="stat-box"><small>Logic</small><br><span class="stat-val" id="st-logic">0</span></div>
-                <div class="stat-box"><small>Disc</small><br><span class="stat-val" id="st-disc">0</span></div>
-                <div class="stat-box"><small>Lead</small><br><span class="stat-val" id="st-lead">0</span></div>
-                <div class="stat-box"><small>Creat</small><br><span class="stat-val" id="st-creat">0</span></div>
+    <div id="achievements" class="tab-content">
+        <h2 style="margin-bottom: 10px;">Hall of Fame</h2>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Pencapaian otomatis terbuka berdasarkan progresmu.</p>
+        
+        <div class="badge-grid" id="badge-container">
             </div>
-            <button onclick="logout()" style="margin-top: 15px; background: none; border: none; color: #f85149; font-size: 11px; cursor: pointer;">LOGOUT ACCOUNT</button>
+    </div>
+
+    <div id="profile" class="tab-content">
+        <div class="card" style="text-align: center; border-color: var(--primary);">
+            <h2 id="user-display" style="font-size: 24px;">User</h2>
+            <div style="font-size: 48px; font-weight: 800; color: var(--primary); margin: 10px 0;" id="lvl-display">LVL 1</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 20px;">Daily Progress: <span id="daily-exp">0</span>/200 XP</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid #30363d;">
+                    <small style="color:var(--text-dim)">Total Logic</small><br><span class="stat-val" id="st-logic">0</span>
+                </div>
+                <div style="background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid #30363d;">
+                    <small style="color:var(--text-dim)">Total Disc</small><br><span class="stat-val" id="st-disc">0</span>
+                </div>
+            </div>
+            <button onclick="logout()" style="margin-top: 20px; background: none; border: none; color: var(--heart); font-size: 12px; cursor: pointer; font-weight: bold;">SIGN OUT</button>
         </div>
 
-        <h3>Leaderboard</h3><br>
+        <h3 style="margin-bottom: 15px;">Global Ranking</h3>
         <div id="leaderboard-list"></div>
     </div>
 
@@ -105,7 +123,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -124,7 +142,15 @@
     let userData = {};
     let currentUser = null;
 
-    // --- TAB NAVIGATION ---
+    const ALL_BADGES = [
+        { id: 'first_step', icon: '🐣', name: 'First Step', desc: 'Selesaikan 1 misi', goal: 1 },
+        { id: 'hard_worker', icon: '⚒️', name: 'Hard Worker', desc: 'Selesaikan 10 misi', goal: 10 },
+        { id: 'logic_expert', icon: '🧠', name: 'Logic Expert', desc: 'Logic mencapai 10', stat: 'logic', goal: 10 },
+        { id: 'iron_will', icon: '🛡️', name: 'Iron Will', desc: 'Discipline mencapai 10', stat: 'discipline', goal: 10 },
+        { id: 'level_5', icon: '⭐', name: 'Elite User', desc: 'Mencapai Level 5', stat: 'level', goal: 5 },
+        { id: 'legend', icon: '👑', name: 'Mastery Legend', desc: 'Level 10', stat: 'level', goal: 10 }
+    ];
+
     window.showTab = (tabId, el) => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -140,9 +166,9 @@
         try {
             await signInWithEmailAndPassword(auth, email, pass);
         } catch (e) {
-            if(confirm("Buat akun baru?")) {
+            if(confirm("Daftar akun baru?")) {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                userData = { username: email.split('@')[0], level: 1, exp: 0, dailyExp: 0, weeklyExp: 0, logic: 0, discipline: 0, lead: 0, creat: 0, myQuests: [], lastDailyReset: new Date().toDateString() };
+                userData = { username: email.split('@')[0], level: 1, exp: 0, dailyExp: 0, weeklyExp: 0, logic: 0, discipline: 0, lead: 0, creat: 0, totalQuests: 0, myQuests: [], lastDailyReset: new Date().toDateString() };
                 await setDoc(doc(db, "users", res.user.uid), userData);
             }
         }
@@ -150,14 +176,7 @@
 
     window.logout = () => signOut(auth).then(() => location.reload());
 
-    async function save() {
-        if (currentUser) {
-            await updateDoc(doc(db, "users", currentUser.uid), userData);
-            updateUI();
-        }
-    }
-
-    window.addNewQuest = () => {
+    window.addNewQuest = async () => {
         const title = document.getElementById('q-title').value;
         const note = document.getElementById('q-note').value;
         const type = document.getElementById('q-type').value;
@@ -165,25 +184,31 @@
         userData.myQuests.push({ id: Date.now(), title, note, type, exp: 25, unlockAt: Date.now() + 60000 });
         document.getElementById('q-title').value = "";
         document.getElementById('q-note').value = "";
-        save();
-        alert("Misi ditambahkan! Cek tab Quests.");
+        await updateDoc(doc(db, "users", currentUser.uid), { myQuests: userData.myQuests });
+        alert("Misi Dimulai!");
     };
 
     window.completeQuest = async (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
         const q = userData.myQuests[idx];
-        if (Date.now() < q.unlockAt) return alert("Masih Cooldown!");
-        
+        if (Date.now() < q.unlockAt) return alert("Belum selesai cooldown!");
+
         userData.exp += q.exp;
         userData.dailyExp += q.exp;
         userData.weeklyExp += q.exp;
         userData[q.type]++;
-        
-        await addDoc(collection(db, "feed"), { username: userData.username, title: q.title, note: q.note || "Tanpa bukti", timestamp: serverTimestamp() });
+        userData.totalQuests = (userData.totalQuests || 0) + 1;
 
+        await addDoc(collection(db, "feed"), { username: userData.username, title: q.title, note: q.note || "Tanpa bukti", respects: 0, timestamp: serverTimestamp() });
         if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
         userData.myQuests.splice(idx, 1);
-        save();
+        
+        await updateDoc(doc(db, "users", currentUser.uid), userData);
+    };
+
+    window.giveRespect = async (feedId) => {
+        const feedRef = doc(db, "feed", feedId);
+        await updateDoc(feedRef, { respects: increment(1) });
     };
 
     function updateUI() {
@@ -195,36 +220,51 @@
         document.getElementById('daily-exp').innerText = userData.dailyExp;
         document.getElementById('st-logic').innerText = userData.logic;
         document.getElementById('st-disc').innerText = userData.discipline;
-        document.getElementById('st-lead').innerText = userData.lead;
-        document.getElementById('st-creat').innerText = userData.creat;
-        
-        let badge = "🌱 Aspirant";
-        if(userData.logic >= 10) badge = "🎓 Logic Wizard";
-        document.getElementById('rank-display').innerText = badge;
 
+        // Render Quests
         document.getElementById('quest-list').innerHTML = userData.myQuests.map(q => `
             <div class="quest-card">
                 <div><strong>${q.title}</strong><br><small style="color:var(--text-dim)">${q.type.toUpperCase()}</small></div>
                 <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="completeQuest(${q.id})">DONE</button>
             </div>
-        `).join('') || '<p style="color:var(--text-dim)">Tidak ada misi aktif.</p>';
+        `).join('') || '<p style="color:var(--text-dim); text-align:center;">Tidak ada misi aktif.</p>';
+
+        // Render Badges
+        document.getElementById('badge-container').innerHTML = ALL_BADGES.map(b => {
+            let isUnlocked = false;
+            if (b.stat) isUnlocked = userData[b.stat] >= b.goal;
+            else isUnlocked = (userData.totalQuests || 0) >= b.goal;
+            
+            return `
+                <div class="badge-item ${isUnlocked ? 'unlocked' : ''}">
+                    <span class="badge-icon">${b.icon}</span>
+                    <span class="badge-name">${b.name}</span>
+                </div>
+            `;
+        }).join('');
     }
 
-    onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(15)), (snap) => {
-        document.getElementById('global-feed').innerHTML = snap.docs.map(doc => `
-            <div class="feed-item">
-                <small>@${doc.data().username}</small>
-                <div style="font-weight:800; color:var(--primary); margin:2px 0;">${doc.data().title}</div>
-                <div style="font-size:11px; color:var(--text-dim)">"${doc.data().note}"</div>
-            </div>
-        `).join('');
+    onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
+        document.getElementById('global-feed').innerHTML = snap.docs.map(doc => {
+            const d = doc.data();
+            return `
+                <div class="feed-item">
+                    <div class="feed-header">
+                        <strong>@${d.username}</strong>
+                        <button class="respect-btn" onclick="giveRespect('${doc.id}')">🤝 ${d.respects || 0}</button>
+                    </div>
+                    <div style="font-weight:800; color:var(--primary);">${d.title}</div>
+                    <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">"${d.note}"</div>
+                </div>
+            `;
+        }).join('');
     });
 
     onSnapshot(query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10)), (snap) => {
         document.getElementById('leaderboard-list').innerHTML = snap.docs.map((doc, i) => `
-            <div class="quest-card" style="margin-bottom:5px; border-left: ${currentUser && doc.id === currentUser.uid ? '4px solid var(--primary)' : 'none'}">
+            <div class="quest-card" style="margin-bottom:8px; border-left: ${currentUser && doc.id === currentUser.uid ? '4px solid var(--primary)' : 'none'}">
                 <span>#${i+1} ${doc.data().username}</span>
-                <span style="color:var(--gold)">${doc.data().weeklyExp} XP</span>
+                <span style="color:var(--gold); font-weight:800;">${doc.data().weeklyExp} XP</span>
             </div>
         `).join('');
     });
@@ -232,10 +272,12 @@
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            const d = await getDoc(doc(db, "users", user.uid));
-            if (d.exists()) { userData = d.data(); updateUI(); }
+            onSnapshot(doc(db, "users", user.uid), (d) => {
+                if (d.exists()) { userData = d.data(); updateUI(); }
+            });
         } else {
             document.getElementById('auth-screen').style.display = "flex";
+            document.getElementById('navbar').style.display = "none";
         }
     });
 </script>
