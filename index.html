@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasteryPath - Cloud Growth Engine</title>
+    <title>MasteryPath - Ultimate Cloud</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,30 +11,28 @@
             --accent: #238636; --text: #c9d1d9; --text-dim: #8b949e; --gold: #f1e05a;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
         .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         .full-width { grid-column: 1 / -1; }
         .card { background: var(--surface); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; }
         
-        /* Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .stat-item { text-align: center; background: #0d1117; padding: 10px; border-radius: 10px; border-bottom: 3px solid var(--primary); }
         .stat-val { font-size: 18px; font-weight: 800; display: block; }
 
-        /* Forms */
         label { display: block; font-size: 11px; margin-bottom: 5px; color: var(--text-dim); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; }
+        
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: #000; }
         .btn-add { background: var(--accent); color: white; }
 
-        /* Items */
         .quest-item { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: var(--text-dim); font-size: 12px; padding: 10px 5px; border-bottom: 1px solid #30363d; }
-        td { padding: 10px 5px; border-bottom: 1px solid #21262d; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--text-dim); font-size: 12px; padding: 10px; border-bottom: 1px solid #30363d; }
+        td { padding: 10px; border-bottom: 1px solid #21262d; font-size: 14px; }
         
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
 
         @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
     </style>
@@ -42,21 +40,22 @@
 <body>
 
 <div id="auth-screen" class="login-overlay" style="display: none;">
-    <h2 style="color: var(--primary); margin-bottom: 20px;">Welcome to MasteryPath</h2>
-    <button class="btn btn-primary" onclick="handleAuth()" style="width: 250px;">Login / Register</button>
-    <p style="margin-top: 15px; font-size: 12px; color: var(--text-dim);">Gunakan Email & Password untuk masuk</p>
+    <h1 style="color: var(--primary); margin-bottom: 10px;">MasteryPath</h1>
+    <p style="color: var(--text-dim); margin-bottom: 25px;">Level up your real-life skills</p>
+    <button class="btn btn-primary" onclick="handleAuth()" style="width: 260px;">LOG IN / REGISTER</button>
 </div>
 
 <div class="container" id="main-content" style="opacity: 0;">
     <div class="card full-width">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 style="color: var(--primary);">Mastery Profile: <span id="user-name-display">...</span></h1>
-                <p style="font-size: 12px; color: var(--gold);">🔥 Daily XP: <span id="daily-exp">0</span> / 200</p>
+                <h2 id="user-display" style="color: var(--primary);">User Profile</h2>
+                <p id="rank-display" style="color: var(--gold); font-size: 13px; font-weight: bold; margin-top: 5px;"></p>
+                <p style="font-size: 11px; color: var(--text-dim); margin-top: 5px;">🔥 Daily XP: <span id="daily-exp">0</span> / 200</p>
             </div>
             <div style="text-align: right;">
-                <div id="lvl-display" style="font-size: 32px; font-weight: 800;">LVL 1</div>
-                <button onclick="logout()" style="background: none; border: 1px solid #f85149; color: #f85149; padding: 2px 8px; border-radius: 5px; font-size: 10px; cursor: pointer; margin-top: 5px;">LOGOUT</button>
+                <div id="lvl-display" style="font-size: 35px; font-weight: 800;">LVL 1</div>
+                <button onclick="logout()" style="background: none; border: 1px solid #f85149; color: #f85149; padding: 3px 10px; border-radius: 5px; font-size: 10px; cursor: pointer; margin-top: 8px;">LOGOUT</button>
             </div>
         </div>
         <div class="stats-grid">
@@ -74,16 +73,16 @@
         </div>
 
         <div class="card">
-            <h3>🏆 Weekly Leaderboard (Live)</h3>
+            <h3>🏆 Live Leaderboard</h3>
             <table>
-                <thead><tr><th>Rank</th><th>Player</th><th style="text-align:right;">Weekly XP</th></tr></thead>
+                <thead><tr><th>Rank</th><th>Player</th><th align="right">Weekly XP</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
 
-        <div class="card" style="opacity: 0.7;">
+        <div class="card" style="opacity: 0.8;">
             <h3>📜 Mastery History</h3>
-            <div id="history-list" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
+            <div id="history-list" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
         </div>
     </div>
 
@@ -91,28 +90,38 @@
         <h3>Add New Quest</h3>
         <div style="margin-top: 15px;">
             <label>Misi</label>
-            <input type="text" id="q-title" placeholder="Contoh: Belajar Kalkulus">
-            <label>Bidang</label>
+            <input type="text" id="q-title" placeholder="Apa yang ingin kamu kerjakan?">
+            
+            <label>Bukti / Catatan</label>
+            <input type="text" id="q-note" placeholder="Link bukti atau rangkuman">
+
+            <label>Bidang Keahlian</label>
             <select id="q-type">
                 <option value="logic">Logic (Math/IT)</option>
                 <option value="discipline">Discipline (Habit)</option>
-                <option value="lead">Leadership (Org)</option>
-                <option value="creat">Creativity (Idea)</option>
+                <option value="lead">Leadership (Social)</option>
+                <option value="creat">Creativity (Design)</option>
             </select>
-            <label>Waktu & Kesulitan</label>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <select id="q-time">
-                    <option value="1">30 Menit (Min 1m Wait)</option>
-                    <option value="2">2 Jam (Min 2m Wait)</option>
-                    <option value="3">3 Jam+ (Min 3m Wait)</option>
-                </select>
-                <select id="q-diff">
-                    <option value="1">Easy</option>
-                    <option value="2">Medium</option>
-                    <option value="3">Hard</option>
-                </select>
+                <div>
+                    <label>Durasi</label>
+                    <select id="q-time">
+                        <option value="1">30 Mnt</option>
+                        <option value="2">2 Jam</option>
+                        <option value="3">3 Jam+</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Kesulitan</label>
+                    <select id="q-diff">
+                        <option value="1">Easy</option>
+                        <option value="2">Medium</option>
+                        <option value="3">Hard</option>
+                    </select>
+                </div>
             </div>
-            <button class="btn btn-add" onclick="addNewQuest()" style="margin-top: 10px;">Tambahkan Misi</button>
+            <button class="btn btn-add" onclick="addNewQuest()" style="margin-top: 5px;">Mulai Misi</button>
         </div>
     </div>
 </div>
@@ -122,9 +131,8 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // CONFIG FIREBASE MILIKMU
     const firebaseConfig = {
-        apiKey: "AIzaSyCxZwRW5WvmSVffmN_0ieJEuZYeDOO9j1w",
+        apiKey: "AIzaSyBlWqB-K30p_N84G2yWnS1v4qO5VvD-K3E", // API KEY BARU KAMU
         authDomain: "masterypath-3c32f.firebaseapp.com",
         projectId: "masterypath-3c32f",
         storageBucket: "masterypath-3c32f.firebasestorage.app",
@@ -139,31 +147,29 @@
     let userData = {};
     let currentUser = null;
 
-    // --- AUTH LOGIC ---
+    // --- AUTH ---
     window.handleAuth = async () => {
-        const email = prompt("Masukkan Email:");
-        const pass = prompt("Masukkan Password (min 6 karakter):");
+        const email = prompt("Email:");
+        const pass = prompt("Password (min 6 karakter):");
         if(!email || !pass) return;
-
         try {
             await signInWithEmailAndPassword(auth, email, pass);
         } catch (e) {
-            if(confirm("Akun tidak ditemukan. Buat baru dengan email ini?")) {
+            if(confirm("Akun tidak ditemukan. Buat baru?")) {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                const newData = {
-                    username: email.split('@')[0],
-                    level: 1, exp: 0, dailyExp: 0, weeklyExp: 0,
+                const initData = {
+                    username: email.split('@')[0], level: 1, exp: 0, dailyExp: 0, weeklyExp: 0,
                     logic: 0, discipline: 0, lead: 0, creat: 0,
                     myQuests: [], history: [], lastDailyReset: new Date().toDateString()
                 };
-                await setDoc(doc(db, "users", res.user.uid), newData);
+                await setDoc(doc(db, "users", res.user.uid), initData);
             }
         }
     };
 
     window.logout = () => signOut(auth).then(() => location.reload());
 
-    // --- GAME ENGINE ---
+    // --- ENGINE ---
     async function save() {
         if (currentUser) {
             await updateDoc(doc(db, "users", currentUser.uid), userData);
@@ -174,41 +180,53 @@
     window.addNewQuest = () => {
         const title = document.getElementById('q-title').value;
         const type = document.getElementById('q-type').value;
+        const note = document.getElementById('q-note').value;
         const time = parseInt(document.getElementById('q-time').value);
         const diff = parseInt(document.getElementById('q-diff').value);
         if(!title) return;
 
-        const xp = (time * 15) + (diff * 10);
         userData.myQuests.push({
-            id: Date.now(), title, type, exp: xp,
-            unlockAt: Date.now() + (time * 60 * 1000) // Cooldown testing: 1 menit per skala
+            id: Date.now(), title, type, note,
+            exp: (time * 15) + (diff * 10),
+            unlockAt: Date.now() + (time * 60 * 1000) // 1 mnt per skala
         });
         document.getElementById('q-title').value = "";
+        document.getElementById('q-note').value = "";
         save();
     };
 
     window.completeQuest = (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
         const q = userData.myQuests[idx];
-        if (Date.now() < q.unlockAt) return alert("Belum waktunya selesai!");
-        if (userData.dailyExp + q.exp > 200) return alert("Batas XP Harian tercapai!");
+        if (Date.now() < q.unlockAt) return alert("Belum waktunya!");
+        if (userData.dailyExp + q.exp > 200) return alert("Batas harian tercapai!");
 
         userData.exp += q.exp;
         userData.dailyExp += q.exp;
         userData.weeklyExp += q.exp;
         userData[q.type]++;
-        userData.history.push({title: q.title, exp: q.exp, time: new Date().toLocaleTimeString()});
+        userData.history.push({title: q.title, exp: q.exp, note: q.note, time: new Date().toLocaleTimeString()});
         
         if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
         userData.myQuests.splice(idx, 1);
         save();
     };
 
-    // --- UI SYNC ---
+    // --- UI ---
+    function getBadge(data) {
+        if (data.logic >= 10) return "🎓 Logic Wizard";
+        if (data.discipline >= 10) return "⏳ Time Master";
+        if (data.lead >= 10) return "🗣️ Great Leader";
+        if (data.creat >= 10) return "🎨 Creative Mind";
+        return "🌱 Newbie Aspirant";
+    }
+
     function updateUI() {
         document.getElementById('main-content').style.opacity = "1";
         document.getElementById('auth-screen').style.display = "none";
-        document.getElementById('user-name-display').innerText = userData.username;
+        
+        document.getElementById('user-display').innerText = `Mastery Profile: ${userData.username}`;
+        document.getElementById('rank-display').innerText = `Rank: ${getBadge(userData)}`;
         document.getElementById('lvl-display').innerText = `LVL ${userData.level}`;
         document.getElementById('daily-exp').innerText = userData.dailyExp;
         document.getElementById('st-logic').innerText = userData.logic;
@@ -216,22 +234,23 @@
         document.getElementById('st-lead').innerText = userData.lead;
         document.getElementById('st-creat').innerText = userData.creat;
 
-        const qList = document.getElementById('quest-list');
-        qList.innerHTML = userData.myQuests.map(q => `
+        document.getElementById('quest-list').innerHTML = userData.myQuests.map(q => `
             <div class="quest-item">
-                <div><strong>${q.title}</strong><br><small>+${q.exp} XP | [${q.type}]</small></div>
+                <div><strong>${q.title}</strong><br><small style="color:var(--text-dim)">Bukti: ${q.note || '-'}</small></div>
                 <button class="btn btn-primary" style="width:auto" onclick="completeQuest(${q.id})">Selesai</button>
             </div>
         `).join('');
 
-        document.getElementById('history-list').innerHTML = userData.history.map(h => 
-            `<div style="font-size:12px; border-bottom:1px solid #222; padding:5px">✓ ${h.title} (+${h.exp})</div>`
-        ).reverse().join('');
+        document.getElementById('history-list').innerHTML = userData.history.map(h => `
+            <div style="font-size:12px; border-bottom:1px solid #222; padding:8px 0;">
+                ✓ <strong>${h.title}</strong> (+${h.exp} XP) <br>
+                <small style="color:var(--text-dim)">Catatan: ${h.note || 'Tidak ada'}</small>
+            </div>
+        `).reverse().join('');
     }
 
-    // Leaderboard Live dari Firebase
-    const qLeader = query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10));
-    onSnapshot(qLeader, (snap) => {
+    // Live Leaderboard
+    onSnapshot(query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10)), (snap) => {
         document.getElementById('leaderboard-body').innerHTML = snap.docs.map((doc, i) => `
             <tr style="${currentUser && doc.id === currentUser.uid ? 'background:#23863644' : ''}">
                 <td>${i+1}</td><td>${doc.data().username}</td><td align="right">${doc.data().weeklyExp} XP</td>
@@ -243,10 +262,7 @@
         if (user) {
             currentUser = user;
             const d = await getDoc(doc(db, "users", user.uid));
-            if (d.exists()) {
-                userData = d.data();
-                updateUI();
-            }
+            if (d.exists()) { userData = d.data(); updateUI(); }
         } else {
             document.getElementById('auth-screen').style.display = "flex";
             document.getElementById('main-content').style.opacity = "0";
