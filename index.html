@@ -237,15 +237,29 @@
         } catch (e) { console.error(e); }
     };
 
-    window.giveRespect = async (feedId, respecters) => {
-        // Cek jika respecters bukan array (jaga-jaga data lama)
-        if (!Array.isArray(respecters)) return alert("Data lama tidak bisa di-respect.");
-        if (respecters.includes(currentUser.uid)) return alert("Sudah memberi respect!");
+    window.giveRespect = async (feedId, currentRespecters) => {
+        if (!currentUser) return alert("Silakan login dulu!");
         
-        const feedRef = doc(db, "feed", feedId);
-        await updateDoc(feedRef, { respects: arrayUnion(currentUser.uid) });
-    };
+        // Pastikan kita bekerja dengan Array
+        const respecters = Array.isArray(currentRespecters) ? currentRespecters : [];
+        
+        if (respecters.includes(currentUser.uid)) {
+            return alert("Kamu sudah memberikan dukungan!");
+        }
 
+        try {
+            const feedRef = doc(db, "feed", feedId);
+            // Menggunakan arrayUnion agar ID kita masuk ke daftar tanpa menghapus orang lain
+            await updateDoc(feedRef, { 
+                respects: arrayUnion(currentUser.uid) 
+            });
+            console.log("Respect berhasil dikirim!");
+        } catch (error) {
+            console.error("Gagal memberi respect:", error);
+            alert("Gagal memberi respect. Cek koneksi atau Firebase Rules kamu.");
+        }
+    };
+    
     // --- LISTENER FEED GLOBAL (DIPERBAIKI) ---
     onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
         const feedContainer = document.getElementById('global-feed');
