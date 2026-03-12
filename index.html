@@ -207,23 +207,50 @@
 
     window.completeQuest = async (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
+        if (idx === -1) return;
+        
         const q = userData.myQuests[idx];
-        if (Date.now() < q.unlockAt) return alert("Misi masih dalam proses!");
+        
+        // Cek Cooldown
+        if (Date.now() < q.unlockAt) {
+            const rem = Math.ceil((q.unlockAt - Date.now()) / 1000);
+            return alert(`⏳ Sabar! Tunggu ${rem} detik lagi.`);
+        }
 
-        userData.exp += q.exp;
-        userData.dailyExp += q.exp;
-        userData.weeklyExp += q.exp;
-        userData[q.type]++;
-        userData.totalQuests++;
+        try {
+            // 1. Tambahkan ke Feed Global TERLEBIH DAHULU
+            await addDoc(collection(db, "feed"), { 
+                userId: currentUser.uid, 
+                username: userData.username || "Anonymous", 
+                title: q.title, 
+                note: q.note || "Misi selesai!", 
+                respects: [], 
+                timestamp: serverTimestamp() 
+            });
 
-        await addDoc(collection(db, "feed"), { 
-            userId: currentUser.uid, username: userData.username, 
-            title: q.title, note: q.note || "Selesai!", respects: [], timestamp: serverTimestamp() 
-        });
+            // 2. Update Data User
+            userData.exp += q.exp;
+            userData.dailyExp += q.exp;
+            userData.weeklyExp += q.exp;
+            userData[q.type] = (userData[q.type] || 0) + 1;
+            userData.totalQuests = (userData.totalQuests || 0) + 1;
 
-        if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
-        userData.myQuests.splice(idx, 1);
-        await updateDoc(doc(db, "users", currentUser.uid), userData);
+            if (userData.exp >= 100) { 
+                userData.level++; 
+                userData.exp -= 100; 
+                alert("🎉 LEVEL UP!");
+            }
+
+            // 3. Hapus dari daftar misi aktif
+            userData.myQuests.splice(idx, 1);
+
+            // 4. Simpan ke Cloud
+            await updateDoc(doc(db, "users", currentUser.uid), userData);
+            
+        } catch (error) {
+            console.error("Gagal menyelesaikan misi:", error);
+            alert("Terjadi kesalahan koneksi. Coba lagi.");
+        }
     };
 
     window.giveRespect = async (feedId, respecters) => {
