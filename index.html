@@ -208,23 +208,18 @@
     window.completeQuest = async (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
         if (idx === -1) return;
-        
         const q = userData.myQuests[idx];
         
-        // Cek Cooldown
-        if (Date.now() < q.unlockAt) {
-            const rem = Math.ceil((q.unlockAt - Date.now()) / 1000);
-            return alert(`⏳ Sabar! Tunggu ${rem} detik lagi.`);
-        }
+        if (Date.now() < q.unlockAt) return alert("Misi masih cooldown!");
 
         try {
-            // 1. Tambahkan ke Feed Global TERLEBIH DAHULU
+            // 1. Kirim ke Feed dengan format respects yang BENAR (Array [])
             await addDoc(collection(db, "feed"), { 
                 userId: currentUser.uid, 
                 username: userData.username || "Anonymous", 
                 title: q.title, 
                 note: q.note || "Misi selesai!", 
-                respects: [], 
+                respects: [], // Harus Array kosong
                 timestamp: serverTimestamp() 
             });
 
@@ -235,23 +230,49 @@
             userData[q.type] = (userData[q.type] || 0) + 1;
             userData.totalQuests = (userData.totalQuests || 0) + 1;
 
-            if (userData.exp >= 100) { 
-                userData.level++; 
-                userData.exp -= 100; 
-                alert("🎉 LEVEL UP!");
-            }
-
-            // 3. Hapus dari daftar misi aktif
+            if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
             userData.myQuests.splice(idx, 1);
 
-            // 4. Simpan ke Cloud
             await updateDoc(doc(db, "users", currentUser.uid), userData);
-            
-        } catch (error) {
-            console.error("Gagal menyelesaikan misi:", error);
-            alert("Terjadi kesalahan koneksi. Coba lagi.");
-        }
+        } catch (e) { console.error(e); }
     };
+
+    window.giveRespect = async (feedId, respecters) => {
+        // Cek jika respecters bukan array (jaga-jaga data lama)
+        if (!Array.isArray(respecters)) return alert("Data lama tidak bisa di-respect.");
+        if (respecters.includes(currentUser.uid)) return alert("Sudah memberi respect!");
+        
+        const feedRef = doc(db, "feed", feedId);
+        await updateDoc(feedRef, { respects: arrayUnion(currentUser.uid) });
+    };
+
+    // --- LISTENER FEED GLOBAL (DIPERBAIKI) ---
+    onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
+        const feedContainer = document.getElementById('global-feed');
+        if (snap.empty) {
+            feedContainer.innerHTML = '<p align="center" style="color:var(--text-dim); margin-top:20px;">Belum ada aktivitas warga.</p>';
+            return;
+        }
+
+        feedContainer.innerHTML = snap.docs.map(doc => {
+            const d = doc.data();
+            // Pastikan respects adalah array agar tidak error .length
+            const rList = Array.isArray(d.respects) ? d.respects : [];
+            const liked = rList.includes(currentUser?.uid);
+            
+            return `
+                <div class="feed-item">
+                    <div class="feed-header">
+                        <strong>@${d.username}</strong>
+                        <button class="respect-btn ${liked?'active':''}" onclick="giveRespect('${doc.id}', ${JSON.stringify(rList)})">
+                            🤝 ${rList.length}
+                        </button>
+                    </div>
+                    <div style="font-weight:800; color:var(--primary); font-size:16px;">${d.title}</div>
+                    <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">"${d.note}"</div>
+                </div>`;
+        }).join('');
+    });
 
     window.giveRespect = async (feedId, respecters) => {
         if (respecters.includes(currentUser.uid)) return alert("Sudah memberi respect!");
