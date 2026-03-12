@@ -15,25 +15,19 @@
         .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         .full-width { grid-column: 1 / -1; }
         .card { background: var(--surface); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; }
-        
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .stat-item { text-align: center; background: #0d1117; padding: 10px; border-radius: 10px; border-bottom: 3px solid var(--primary); }
         .stat-val { font-size: 18px; font-weight: 800; display: block; }
-
         label { display: block; font-size: 11px; margin-bottom: 5px; color: var(--text-dim); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; background: #0d1117; border: 1px solid #30363d; color: white; outline: none; }
-        
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: #000; }
         .btn-add { background: var(--accent); color: white; }
-
         .quest-item { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: var(--text-dim); font-size: 12px; padding: 10px; border-bottom: 1px solid #30363d; }
         td { padding: 10px; border-bottom: 1px solid #21262d; font-size: 14px; }
-        
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-
         @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -71,7 +65,6 @@
             <h3>⚔️ Active Quests</h3>
             <div id="quest-list" style="margin-top: 15px;"></div>
         </div>
-
         <div class="card">
             <h3>🏆 Live Leaderboard</h3>
             <table>
@@ -79,7 +72,6 @@
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
-
         <div class="card" style="opacity: 0.8;">
             <h3>📜 Mastery History</h3>
             <div id="history-list" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
@@ -91,10 +83,8 @@
         <div style="margin-top: 15px;">
             <label>Misi</label>
             <input type="text" id="q-title" placeholder="Apa yang ingin kamu kerjakan?">
-            
             <label>Bukti / Catatan</label>
             <input type="text" id="q-note" placeholder="Link bukti atau rangkuman">
-
             <label>Bidang Keahlian</label>
             <select id="q-type">
                 <option value="logic">Logic (Math/IT)</option>
@@ -102,24 +92,9 @@
                 <option value="lead">Leadership (Social)</option>
                 <option value="creat">Creativity (Design)</option>
             </select>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>Durasi</label>
-                    <select id="q-time">
-                        <option value="1">30 Mnt</option>
-                        <option value="2">2 Jam</option>
-                        <option value="3">3 Jam+</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Kesulitan</label>
-                    <select id="q-diff">
-                        <option value="1">Easy</option>
-                        <option value="2">Medium</option>
-                        <option value="3">Hard</option>
-                    </select>
-                </div>
+                <div><label>Durasi</label><select id="q-time"><option value="1">30 Mnt</option><option value="2">2 Jam</option><option value="3">3 Jam+</option></select></div>
+                <div><label>Kesulitan</label><select id="q-diff"><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></div>
             </div>
             <button class="btn btn-add" onclick="addNewQuest()" style="margin-top: 5px;">Mulai Misi</button>
         </div>
@@ -131,8 +106,9 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+    // API KEY SUDAH DIPERBAIKI SESUAI MILIKMU
     const firebaseConfig = {
-        apiKey: "AIzaSyBlWqB-K30p_N84G2yWnS1v4qO5VvD-K3E", // API KEY BARU KAMU
+        apiKey: "AIzaSyCxZwRW5WvmSVffmN_0ieJEuZYeDOO9j1w",
         authDomain: "masterypath-3c32f.firebaseapp.com",
         projectId: "masterypath-3c32f",
         storageBucket: "masterypath-3c32f.firebasestorage.app",
@@ -147,7 +123,6 @@
     let userData = {};
     let currentUser = null;
 
-    // --- AUTH ---
     window.handleAuth = async () => {
         const email = prompt("Email:");
         const pass = prompt("Password (min 6 karakter):");
@@ -169,7 +144,6 @@
 
     window.logout = () => signOut(auth).then(() => location.reload());
 
-    // --- ENGINE ---
     async function save() {
         if (currentUser) {
             await updateDoc(doc(db, "users", currentUser.uid), userData);
@@ -184,11 +158,10 @@
         const time = parseInt(document.getElementById('q-time').value);
         const diff = parseInt(document.getElementById('q-diff').value);
         if(!title) return;
-
         userData.myQuests.push({
             id: Date.now(), title, type, note,
             exp: (time * 15) + (diff * 10),
-            unlockAt: Date.now() + (time * 60 * 1000) // 1 mnt per skala
+            unlockAt: Date.now() + (time * 60 * 1000)
         });
         document.getElementById('q-title').value = "";
         document.getElementById('q-note').value = "";
@@ -199,20 +172,17 @@
         const idx = userData.myQuests.findIndex(q => q.id === id);
         const q = userData.myQuests[idx];
         if (Date.now() < q.unlockAt) return alert("Belum waktunya!");
-        if (userData.dailyExp + q.exp > 200) return alert("Batas harian tercapai!");
-
+        if (userData.dailyExp + q.exp > 200) return alert("Batas harian!");
         userData.exp += q.exp;
         userData.dailyExp += q.exp;
         userData.weeklyExp += q.exp;
         userData[q.type]++;
         userData.history.push({title: q.title, exp: q.exp, note: q.note, time: new Date().toLocaleTimeString()});
-        
         if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
         userData.myQuests.splice(idx, 1);
         save();
     };
 
-    // --- UI ---
     function getBadge(data) {
         if (data.logic >= 10) return "🎓 Logic Wizard";
         if (data.discipline >= 10) return "⏳ Time Master";
@@ -224,7 +194,6 @@
     function updateUI() {
         document.getElementById('main-content').style.opacity = "1";
         document.getElementById('auth-screen').style.display = "none";
-        
         document.getElementById('user-display').innerText = `Mastery Profile: ${userData.username}`;
         document.getElementById('rank-display').innerText = `Rank: ${getBadge(userData)}`;
         document.getElementById('lvl-display').innerText = `LVL ${userData.level}`;
@@ -233,14 +202,12 @@
         document.getElementById('st-disc').innerText = userData.discipline;
         document.getElementById('st-lead').innerText = userData.lead;
         document.getElementById('st-creat').innerText = userData.creat;
-
         document.getElementById('quest-list').innerHTML = userData.myQuests.map(q => `
             <div class="quest-item">
                 <div><strong>${q.title}</strong><br><small style="color:var(--text-dim)">Bukti: ${q.note || '-'}</small></div>
                 <button class="btn btn-primary" style="width:auto" onclick="completeQuest(${q.id})">Selesai</button>
             </div>
         `).join('');
-
         document.getElementById('history-list').innerHTML = userData.history.map(h => `
             <div style="font-size:12px; border-bottom:1px solid #222; padding:8px 0;">
                 ✓ <strong>${h.title}</strong> (+${h.exp} XP) <br>
@@ -249,7 +216,6 @@
         `).reverse().join('');
     }
 
-    // Live Leaderboard
     onSnapshot(query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10)), (snap) => {
         document.getElementById('leaderboard-body').innerHTML = snap.docs.map((doc, i) => `
             <tr style="${currentUser && doc.id === currentUser.uid ? 'background:#23863644' : ''}">
