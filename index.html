@@ -238,42 +238,41 @@
     };
 
     window.toggleRespect = async (feedId, respecters) => {
-        if (!currentUser) return alert("Login dulu bro!");
+        if (!currentUser) return alert("Login dulu!");
         
         const feedRef = doc(db, "feed", feedId);
-        const hasLiked = respecters.includes(currentUser.uid);
+        // Pastikan kita bekerja dengan Array
+        const rList = Array.isArray(respecters) ? respecters : [];
+        const isLiked = rList.includes(currentUser.uid);
 
         try {
-            if (hasLiked) {
-                // MEKANISME UNRESPECT: Hapus UID kita dari array
-                await updateDoc(feedRef, {
-                    respects: respecters.filter(id => id !== currentUser.uid)
-                });
+            if (isLiked) {
+                // UNRESPECT: Buat array baru tanpa ID kita
+                const newList = rList.filter(id => id !== currentUser.uid);
+                await updateDoc(feedRef, { respects: newList });
             } else {
-                // MEKANISME RESPECT: Tambah UID kita ke array
-                await updateDoc(feedRef, {
-                    respects: arrayUnion(currentUser.uid)
-                });
+                // RESPECT: Tambahkan ID kita ke daftar
+                await updateDoc(feedRef, { respects: arrayUnion(currentUser.uid) });
             }
         } catch (error) {
-            console.error("Error toggling respect:", error);
-            alert("Gagal! Pastikan Firebase Rules sudah di-Publish ke 'allow update'.");
+            console.error("Gagal Respect:", error);
+            alert("Firebase memblokir akses. Pastikan Rules sudah di-Publish ke 'allow update'.");
         }
     };
 
-    // UPDATE LISTENER FEED (Agar tombol memanggil toggleRespect)
+    // LISTENER FEED GLOBAL
     onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
         const feedContainer = document.getElementById('global-feed');
         feedContainer.innerHTML = snap.docs.map(doc => {
             const d = doc.data();
             const rList = Array.isArray(d.respects) ? d.respects : [];
-            const liked = rList.includes(currentUser?.uid);
+            const isMyLike = rList.includes(currentUser?.uid);
             
             return `
                 <div class="feed-item">
                     <div class="feed-header">
                         <strong>@${d.username}</strong>
-                        <button class="respect-btn ${liked?'active':''}" 
+                        <button class="respect-btn ${isMyLike ? 'active' : ''}" 
                                 onclick="toggleRespect('${doc.id}', ${JSON.stringify(rList)})">
                             🤝 ${rList.length}
                         </button>
@@ -283,39 +282,6 @@
                 </div>`;
         }).join('');
     });
-
-    // --- LISTENER FEED GLOBAL (DIPERBAIKI) ---
-    onSnapshot(query(collection(db, "feed"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
-        const feedContainer = document.getElementById('global-feed');
-        if (snap.empty) {
-            feedContainer.innerHTML = '<p align="center" style="color:var(--text-dim); margin-top:20px;">Belum ada aktivitas warga.</p>';
-            return;
-        }
-
-        feedContainer.innerHTML = snap.docs.map(doc => {
-            const d = doc.data();
-            // Pastikan respects adalah array agar tidak error .length
-            const rList = Array.isArray(d.respects) ? d.respects : [];
-            const liked = rList.includes(currentUser?.uid);
-            
-            return `
-                <div class="feed-item">
-                    <div class="feed-header">
-                        <strong>@${d.username}</strong>
-                        <button class="respect-btn ${liked?'active':''}" onclick="giveRespect('${doc.id}', ${JSON.stringify(rList)})">
-                            🤝 ${rList.length}
-                        </button>
-                    </div>
-                    <div style="font-weight:800; color:var(--primary); font-size:16px;">${d.title}</div>
-                    <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">"${d.note}"</div>
-                </div>`;
-        }).join('');
-    });
-
-    window.giveRespect = async (feedId, respecters) => {
-        if (respecters.includes(currentUser.uid)) return alert("Sudah memberi respect!");
-        await updateDoc(doc(db, "feed", feedId), { respects: arrayUnion(currentUser.uid) });
-    };
 
     function checkStreak() {
         const today = new Date().toDateString();
