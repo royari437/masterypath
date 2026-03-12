@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasteryPath - Growth Engine</title>
+    <title>MasteryPath - Cloud Growth Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -33,22 +33,30 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; color: var(--text-dim); font-size: 12px; padding: 10px 5px; border-bottom: 1px solid #30363d; }
         td { padding: 10px 5px; border-bottom: 1px solid #21262d; font-size: 14px; }
+        
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
 
         @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="auth-screen" class="login-overlay" style="display: none;">
+    <h2 style="color: var(--primary); margin-bottom: 20px;">Welcome to MasteryPath</h2>
+    <button class="btn btn-primary" onclick="handleAuth()" style="width: 250px;">Login / Register</button>
+    <p style="margin-top: 15px; font-size: 12px; color: var(--text-dim);">Gunakan Email & Password untuk masuk</p>
+</div>
+
+<div class="container" id="main-content" style="opacity: 0;">
     <div class="card full-width">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 style="color: var(--primary);">Character Profile</h1>
+                <h1 style="color: var(--primary);">Mastery Profile: <span id="user-name-display">...</span></h1>
                 <p style="font-size: 12px; color: var(--gold);">🔥 Daily XP: <span id="daily-exp">0</span> / 200</p>
             </div>
             <div style="text-align: right;">
                 <div id="lvl-display" style="font-size: 32px; font-weight: 800;">LVL 1</div>
-                <small id="xp-total-display">0 / 100 XP</small>
+                <button onclick="logout()" style="background: none; border: 1px solid #f85149; color: #f85149; padding: 2px 8px; border-radius: 5px; font-size: 10px; cursor: pointer; margin-top: 5px;">LOGOUT</button>
             </div>
         </div>
         <div class="stats-grid">
@@ -66,14 +74,9 @@
         </div>
 
         <div class="card">
-            <div style="display: flex; justify-content: space-between;">
-                <h3>🏆 Weekly Leaderboard</h3>
-                <small id="reset-timer" style="color: var(--gold);">Reset in: Monday</small>
-            </div>
+            <h3>🏆 Weekly Leaderboard (Live)</h3>
             <table>
-                <thead>
-                    <tr><th>Rank</th><th>Player</th><th style="text-align:right;">Weekly XP</th></tr>
-                </thead>
+                <thead><tr><th>Rank</th><th>Player</th><th style="text-align:right;">Weekly XP</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
@@ -88,8 +91,7 @@
         <h3>Add New Quest</h3>
         <div style="margin-top: 15px;">
             <label>Misi</label>
-            <input type="text" id="q-title" placeholder="Contoh: Belajar Java Dasar">
-            
+            <input type="text" id="q-title" placeholder="Contoh: Belajar Kalkulus">
             <label>Bidang</label>
             <select id="q-type">
                 <option value="logic">Logic (Math/IT)</option>
@@ -97,13 +99,12 @@
                 <option value="lead">Leadership (Org)</option>
                 <option value="creat">Creativity (Idea)</option>
             </select>
-
             <label>Waktu & Kesulitan</label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <select id="q-time">
-                    <option value="1">30 Menit</option>
-                    <option value="2">2 Jam</option>
-                    <option value="3">3 Jam+</option>
+                    <option value="1">30 Menit (Min 1m Wait)</option>
+                    <option value="2">2 Jam (Min 2m Wait)</option>
+                    <option value="3">3 Jam+ (Min 3m Wait)</option>
                 </select>
                 <select id="q-diff">
                     <option value="1">Easy</option>
@@ -111,163 +112,146 @@
                     <option value="3">Hard</option>
                 </select>
             </div>
-
-            <button class="btn btn-add" onclick="addNewQuest()">Tambahkan Misi</button>
+            <button class="btn btn-add" onclick="addNewQuest()" style="margin-top: 10px;">Tambahkan Misi</button>
         </div>
     </div>
 </div>
 
-<script>
-    // --- 1. DATA STATE ---
-    let userData = JSON.parse(localStorage.getItem('masterypath_data')) || {
-        level: 1, exp: 0, dailyExp: 0, weeklyExp: 0,
-        lastDailyReset: new Date().toDateString(),
-        lastWeeklyReset: "",
-        logic: 0, discipline: 0, lead: 0, creat: 0,
-        myQuests: [], history: []
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // CONFIG FIREBASE MILIKMU
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRnChtoEdFiOErtA7y1hQ3J6MLOoO-D4Q",
+        authDomain: "masterypath-3c32f.firebaseapp.com",
+        projectId: "masterypath-3c32f",
+        storageBucket: "masterypath-3c32f.firebasestorage.app",
+        messagingSenderId: "706432336461",
+        appId: "1:706432336461:web:0496bbe0d544b1d8d1d204"
     };
 
-    const DAILY_LIMIT = 200;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    // --- 2. CORE LOGIC ---
-    function save() {
-        localStorage.setItem('masterypath_data', JSON.stringify(userData));
-        updateUI();
+    let userData = {};
+    let currentUser = null;
+
+    // --- AUTH LOGIC ---
+    window.handleAuth = async () => {
+        const email = prompt("Masukkan Email:");
+        const pass = prompt("Masukkan Password (min 6 karakter):");
+        if(!email || !pass) return;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch (e) {
+            if(confirm("Akun tidak ditemukan. Buat baru dengan email ini?")) {
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                const newData = {
+                    username: email.split('@')[0],
+                    level: 1, exp: 0, dailyExp: 0, weeklyExp: 0,
+                    logic: 0, discipline: 0, lead: 0, creat: 0,
+                    myQuests: [], history: [], lastDailyReset: new Date().toDateString()
+                };
+                await setDoc(doc(db, "users", res.user.uid), newData);
+            }
+        }
+    };
+
+    window.logout = () => signOut(auth).then(() => location.reload());
+
+    // --- GAME ENGINE ---
+    async function save() {
+        if (currentUser) {
+            await updateDoc(doc(db, "users", currentUser.uid), userData);
+            updateUI();
+        }
     }
 
-    function checkResets() {
-        const now = new Date();
-        const todayStr = now.toDateString();
-
-        // Daily Reset
-        if (userData.lastDailyReset !== todayStr) {
-            userData.dailyExp = 0;
-            userData.lastDailyReset = todayStr;
-        }
-
-        // Weekly Reset (Setiap Senin)
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-        const mondayStr = new Date(now.setDate(diff)).toDateString();
-        if (userData.lastWeeklyReset !== mondayStr) {
-            userData.weeklyExp = 0;
-            userData.lastWeeklyReset = mondayStr;
-        }
-    }
-
-    function addNewQuest() {
+    window.addNewQuest = () => {
         const title = document.getElementById('q-title').value;
         const type = document.getElementById('q-type').value;
         const time = parseInt(document.getElementById('q-time').value);
         const diff = parseInt(document.getElementById('q-diff').value);
-
-        if (!title) return alert("Tulis misi kamu!");
+        if(!title) return;
 
         const xp = (time * 15) + (diff * 10);
-        const cooldown = time * 1 * 60 * 1000; // 1 Skala = 1 Menit (Testing)
-
         userData.myQuests.push({
-            id: Date.now(),
-            title: title,
-            type: type,
-            exp: xp,
-            unlockAt: Date.now() + cooldown
+            id: Date.now(), title, type, exp: xp,
+            unlockAt: Date.now() + (time * 60 * 1000) // Cooldown testing: 1 menit per skala
         });
-
         document.getElementById('q-title').value = "";
         save();
-    }
+    };
 
-    function completeQuest(id) {
+    window.completeQuest = (id) => {
         const idx = userData.myQuests.findIndex(q => q.id === id);
         const q = userData.myQuests[idx];
-        const now = Date.now();
+        if (Date.now() < q.unlockAt) return alert("Belum waktunya selesai!");
+        if (userData.dailyExp + q.exp > 200) return alert("Batas XP Harian tercapai!");
 
-        if (now < q.unlockAt) {
-            const wait = Math.ceil((q.unlockAt - now) / 1000);
-            return alert(`⏳ Cooldown! Tunggu ${wait} detik lagi.`);
-        }
-
-        if (userData.dailyExp + q.exp > DAILY_LIMIT) {
-            return alert("🚫 Daily XP Limit tercapai! Lanjut besok.");
-        }
-
-        // Update Stats
         userData.exp += q.exp;
         userData.dailyExp += q.exp;
         userData.weeklyExp += q.exp;
         userData[q.type]++;
-
-        // History
-        userData.history.push({
-            title: q.title, exp: q.exp, 
-            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        });
-
-        // Level Up
-        if (userData.exp >= 100) {
-            userData.level++;
-            userData.exp -= 100;
-            alert("✨ LEVEL UP!");
-        }
-
+        userData.history.push({title: q.title, exp: q.exp, time: new Date().toLocaleTimeString()});
+        
+        if (userData.exp >= 100) { userData.level++; userData.exp -= 100; }
         userData.myQuests.splice(idx, 1);
         save();
-    }
+    };
 
-    // --- 3. UI RENDERING ---
+    // --- UI SYNC ---
     function updateUI() {
-        checkResets();
-        
-        // Header Info
+        document.getElementById('main-content').style.opacity = "1";
+        document.getElementById('auth-screen').style.display = "none";
+        document.getElementById('user-name-display').innerText = userData.username;
         document.getElementById('lvl-display').innerText = `LVL ${userData.level}`;
-        document.getElementById('xp-total-display').innerText = `${userData.exp} / 100 XP`;
         document.getElementById('daily-exp').innerText = userData.dailyExp;
-        
-        // Stats
         document.getElementById('st-logic').innerText = userData.logic;
         document.getElementById('st-disc').innerText = userData.discipline;
         document.getElementById('st-lead').innerText = userData.lead;
         document.getElementById('st-creat').innerText = userData.creat;
 
-        // Active Quests
         const qList = document.getElementById('quest-list');
-        qList.innerHTML = userData.myQuests.length ? userData.myQuests.map(q => `
+        qList.innerHTML = userData.myQuests.map(q => `
             <div class="quest-item">
-                <div>
-                    <small style="color:var(--text-dim)">[${q.type.toUpperCase()}]</small><br>
-                    <strong>${q.title}</strong><br>
-                    <small style="color:var(--primary)">+${q.exp} XP</small>
-                </div>
-                <button class="btn btn-primary" style="width:auto; padding: 5px 15px;" onclick="completeQuest(${q.id})">Selesai</button>
+                <div><strong>${q.title}</strong><br><small>+${q.exp} XP | [${q.type}]</small></div>
+                <button class="btn btn-primary" style="width:auto" onclick="completeQuest(${q.id})">Selesai</button>
             </div>
-        `).join('') : '<p style="color:var(--text-dim)">Tidak ada misi aktif.</p>';
-
-        // Leaderboard (Simulation)
-        const players = [
-            { name: "Ahmad (You)", xp: userData.weeklyExp, me: true },
-            { name: "Budi_ITS", xp: 150, me: false },
-            { name: "Siti_Math", xp: 110, me: false }
-        ].sort((a,b) => b.xp - a.xp);
-
-        document.getElementById('leaderboard-body').innerHTML = players.map((p, i) => `
-            <tr style="${p.me ? 'background:#23863622' : ''}">
-                <td>${i+1}</td>
-                <td style="color:${p.me ? 'var(--primary)' : 'white'}">${p.name}</td>
-                <td style="text-align:right;">${p.xp} XP</td>
-            </tr>
         `).join('');
 
-        // History
-        document.getElementById('history-list').innerHTML = userData.history.map(h => `
-            <div style="font-size:12px; border-bottom:1px solid #21262d; padding:5px 0;">
-                ✓ ${h.title} (+${h.exp} XP) <span style="float:right">${h.time}</span>
-            </div>
-        `).reverse().join('');
+        document.getElementById('history-list').innerHTML = userData.history.map(h => 
+            `<div style="font-size:12px; border-bottom:1px solid #222; padding:5px">✓ ${h.title} (+${h.exp})</div>`
+        ).reverse().join('');
     }
 
-    updateUI();
-</script>
+    // Leaderboard Live dari Firebase
+    const qLeader = query(collection(db, "users"), orderBy("weeklyExp", "desc"), limit(10));
+    onSnapshot(qLeader, (snap) => {
+        document.getElementById('leaderboard-body').innerHTML = snap.docs.map((doc, i) => `
+            <tr style="${currentUser && doc.id === currentUser.uid ? 'background:#23863644' : ''}">
+                <td>${i+1}</td><td>${doc.data().username}</td><td align="right">${doc.data().weeklyExp} XP</td>
+            </tr>
+        `).join('');
+    });
 
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            const d = await getDoc(doc(db, "users", user.uid));
+            if (d.exists()) {
+                userData = d.data();
+                updateUI();
+            }
+        } else {
+            document.getElementById('auth-screen').style.display = "flex";
+            document.getElementById('main-content').style.opacity = "0";
+        }
+    });
+</script>
 </body>
 </html>
